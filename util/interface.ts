@@ -8,7 +8,18 @@ export interface IUser {
         lastName: String,
     },
     email: String,
+    role: RoleType,
     password: String,
+}
+
+export enum RoleType {
+    ADMIN,
+    USER,
+}
+
+export enum LoginType {
+    TIME_IN,
+    TIME_OUT
 }
 
 export interface Iimg {
@@ -20,3 +31,26 @@ export interface Iimg {
     fullPath: string,
     base64: any
 }
+
+export interface UserAttendance {
+    _id: string | undefined,
+    user: IUser,
+    attendance: AttendanceSetting,
+    type: LoginType
+}
+
+export interface AttendanceSetting {
+    _id: string | undefined,
+    user: IUser,
+    date: Date,
+    status: boolean,
+    timeIn: {
+        start: Date,
+        end: Date
+    },
+    timeOut: {
+        start: Date,
+        end: Date
+    }
+}
+

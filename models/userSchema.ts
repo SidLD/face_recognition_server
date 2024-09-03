@@ -16,6 +16,10 @@ const profileSchema = new Schema<Iimg>(
   { timestamps: true }
 );
 
+enum Role {
+  USER,
+  ADMIN
+}
 
 const userSchema = new Schema<IUser>(
   {
@@ -26,6 +30,7 @@ const userSchema = new Schema<IUser>(
     },
     password: String,
     email: String,
+    role: Role,
     profile: profileSchema,
   },
   {
