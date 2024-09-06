@@ -5,8 +5,6 @@ import bcrypt from 'bcrypt'
 import userAttendanceSchema from "../models/userAttendanceSchema";
 
 
-const DEFAULT_ATTENDANCE = "";
-
 export const register = async (req: any, res: any) => {
     try {
         const { profile } = req.body;
@@ -83,7 +81,6 @@ export const attendanceLogin = async (req: any, res: any) => {
         let attendancRecord : UserAttendance | null = null;
         if(loginType == LoginType.TIME_OUT){
           attendancRecord = await userAttendanceSchema.create({
-            attendance: DEFAULT_ATTENDANCE,
             img: imgPath,
             type: loginType,
             user: {
@@ -100,7 +97,6 @@ export const attendanceLogin = async (req: any, res: any) => {
         let attendancRecord : UserAttendance | null = null;
         if(loginType == LoginType.TIME_IN){
           attendancRecord = await userAttendanceSchema.create({
-            attendance: DEFAULT_ATTENDANCE,
             img: imgPath,
             type: loginType,
             user: {
@@ -110,7 +106,6 @@ export const attendanceLogin = async (req: any, res: any) => {
           })
         }else{
           attendancRecord = await userAttendanceSchema.create({
-            attendance: DEFAULT_ATTENDANCE,
             img: imgPath,
             type: loginType,
             user: {

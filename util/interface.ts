@@ -36,7 +36,7 @@ export interface Iimg {
 export interface UserAttendance {
     _id: string | undefined,
     user: IUser,
-    attendance: AttendanceSetting,
+    // attendance: AttendanceSetting,
     type: LoginType,
     img: Iimg,
     date: Date
@@ -44,16 +44,16 @@ export interface UserAttendance {
     timeOut: Date
 }
 
-export interface AttendanceSetting {
-    _id: string | undefined,
-    status: boolean,
-    timeIn: {
-        start: Date,
-        end: Date
-    },
-    timeOut: {
-        start: Date,
-        end: Date
-    }
-}
+// export interface AttendanceSetting {
+//     _id: string | undefined,
+//     status: boolean,
+//     timeIn: {
+//         start: Date,
+//         end: Date
+//     },
+//     timeOut: {
+//         start: Date,
+//         end: Date
+//     }
+// }
 
