@@ -7,7 +7,8 @@ export interface IUser {
         middleName?: String,
         lastName: String,
     },
-    email: String,
+    contact: String,
+    course: String,
     role: RoleType,
     password: String | undefined,
 }

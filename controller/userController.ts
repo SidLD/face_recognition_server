@@ -18,7 +18,7 @@ export const register = async (req: any, res: any) => {
       
         const user:{
           email: string
-        } | null = await userSchema.findOne({email: params.email})
+        } | null = await userSchema.findOne({email: params.contact, contact: params.contact})
 
       if(user){
         return res.status(400).json({ error: 'User Already Exist' });
@@ -26,12 +26,13 @@ export const register = async (req: any, res: any) => {
       const password = params.password ? params.password.toString() : 'password';
       const hashedPassword = await bcrypt.hash(password, 10)
       const newUser = await userSchema.create({
-        email: params.email,
         username:{
           firstName: params.username.firstName,
           middleName: params.username.middleName,
           lastName: params.username.lastName
         },
+        contact: params.contact,
+        course: params.course,
         password: hashedPassword,
         profile: {
           base64: profile

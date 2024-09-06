@@ -32,7 +32,8 @@ const userSchema = new Schema<IUser>(
       type: String,
       required: false, 
     },
-    email: { type: String, required: true },
+    contact: { type: String, required: true },
+    course: { type: String, required: true },
     role: {
       enum: Object.values(RoleType),
       required: true,
