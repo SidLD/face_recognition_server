@@ -9,7 +9,7 @@ export interface IUser {
     },
     email: String,
     role: RoleType,
-    password: String,
+    password: String | undefined,
 }
 
 export enum RoleType {
@@ -36,13 +36,15 @@ export interface UserAttendance {
     _id: string | undefined,
     user: IUser,
     attendance: AttendanceSetting,
-    type: LoginType
+    type: LoginType,
+    img: Iimg,
+    date: Date
+    timeIn: Date,
+    timeOut: Date
 }
 
 export interface AttendanceSetting {
     _id: string | undefined,
-    user: IUser,
-    date: Date,
     status: boolean,
     timeIn: {
         start: Date,

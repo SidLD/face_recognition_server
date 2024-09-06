@@ -11,27 +11,33 @@ const profileSchema = new Schema<Iimg>(
     path: String,
     name: String,
     fullPath: String,
-    base64: String
+    base64: String,  
   },
   { timestamps: true }
 );
 
-enum Role {
-  USER,
-  ADMIN
+enum RoleType {
+  USER = "USER",
+  ADMIN = "ADMIN"
 }
 
 const userSchema = new Schema<IUser>(
   {
     username: {
-      firstName:String,
-      lastName:String,
-      middleName: String,
+      firstName: { type: String, required: true },
+      lastName: { type: String, required: true },
+      middleName: String,  // Optional field
     },
-    password: String,
-    email: String,
-    role: Role,
-    profile: profileSchema,
+    password: {
+      type: String,
+      required: false, 
+    },
+    email: { type: String, required: true },
+    role: {
+      enum: Object.values(RoleType),
+      required: true,
+    },
+    profile: { type: profileSchema, required: true },
   },
   {
     timestamps: true,
