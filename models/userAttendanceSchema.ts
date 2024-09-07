@@ -1,33 +1,15 @@
 import mongoose, { Schema, model } from "mongoose";
-import {  IUser, LoginType, UserAttendance } from "../util/interface";
-
-// const attendanceSetting = new Schema<AttendanceSetting>(
-//   { 
-//     status: String,
-//     timeIn: {
-//         start: Date,
-//         end: Date
-//     },
-//     timeOut: {
-//         start: Date,
-//         end: Date
-//     }
-//   },
-//   { timestamps: true }
-// );
+import {  UserAttendance } from "../util/interface";
 
 
 const userAttendance = new Schema<UserAttendance>(
   {
-    // attendance: { type: attendanceSetting, required: true },
-    type: {
-        enum: LoginType
-    },
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
     },
-    img: String,
+    timeInImg: String,
+    timeOutImg: String,
     date: {
         type: Date,
         default: new Date()

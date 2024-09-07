@@ -1,48 +1,51 @@
 import mongoose, { Schema, model } from "mongoose";
 import { Iimg, IUser } from "../util/interface";
 
+// Profile Schema
 const profileSchema = new Schema<Iimg>(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
-    imageType: String,
-    path: String,
-    name: String,
-    fullPath: String,
-    base64: String,  
+    imageType: { type: String },
+    path: { type: String },
+    name: { type: String },
+    fullPath: { type: String },
+    base64: { type: String },
   },
   { timestamps: true }
 );
 
 enum RoleType {
-  USER = "USER",
-  ADMIN = "ADMIN"
+  ADMIN = "ADMIN",
+  USER = "USER"
 }
 
+// User Schema
 const userSchema = new Schema<IUser>(
   {
     username: {
       firstName: { type: String, required: true },
       lastName: { type: String, required: true },
-      middleName: String,  // Optional field
+      middleName: { type: String },
     },
     password: {
       type: String,
-      required: false, 
+      required: false, // Make sure to hash this if needed
     },
     contact: { type: String, required: true },
     course: { type: String, required: true },
     role: {
-      enum: Object.values(RoleType),
+      type: String,
+      enum: RoleType
+    },
+    profile: {
+      type: profileSchema, // Embed the profile schema directly
       required: true,
     },
-    profile: { type: profileSchema, required: true },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
 export default model<IUser>("User", userSchema);

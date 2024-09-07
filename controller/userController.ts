@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import userSchema from "../models/userSchema";
-import { IUser, LoginType, UserAttendance } from "../util/interface";
+import { IUser, UserAttendance } from "../util/interface";
 import bcrypt from 'bcrypt'
 import userAttendanceSchema from "../models/userAttendanceSchema";
 
@@ -31,6 +31,7 @@ export const register = async (req: any, res: any) => {
         },
         contact: params.contact,
         course: params.course,
+        role: params.role,
         password: hashedPassword,
         profile: {
           base64: profile
@@ -59,8 +60,7 @@ export const attendanceLogin = async (req: any, res: any) => {
   try {
       const { id, imgPath, loginType, datetime } = req.body;
     
-      const user: IUser | null = await userSchema.findOne({id: id})
-
+      const user: IUser | null = await userSchema.findOne({_id: new mongoose.Types.ObjectId(id)})
       if(!user){
         return res.status(400).json({ error: 'User Does Not Exist' });
       }
@@ -69,54 +69,64 @@ export const attendanceLogin = async (req: any, res: any) => {
       const startOfToday = new Date(now.setHours(0, 0, 0, 0));
       const endOfToday = new Date(now.setHours(23, 59, 59, 999));
 
-      const attendanceRecord: UserAttendance | null = await userAttendanceSchema.findOne({
-        user: id,
+      const record: UserAttendance | null = await userAttendanceSchema.findOne({
+        user: {
+          _id:  new mongoose.Types.ObjectId(id)
+        },
         date: {
           $gte: startOfToday,
           $lte: endOfToday,
         }
       })
 
-      if(attendanceRecord){
-        let attendancRecord : UserAttendance | null = null;
-        if(loginType == LoginType.TIME_OUT){
-          attendancRecord = await userAttendanceSchema.create({
-            img: imgPath,
-            type: loginType,
-            user: {
-              id: id
+      let attendanceRecord : UserAttendance | null = null;
+
+      if(record){
+        if(loginType == 'TIME_IN' ){
+          if(!record.timeIn){
+            attendanceRecord = await userAttendanceSchema.findOneAndUpdate({
+              _id: new mongoose.Types.ObjectId(record._id)
+            }, {
+              timeInImg: imgPath,
+              timeIn: datetime
             },
-            date: datetime,
-            timeOut: datetime
-          })
-          res.status(200).send({attendancRecord})
-        }else{
-          res.status(400).send({message: "Time In Override is disabled."})
+            {new :true}
+            )
+          }else{
+            return res.status(400).json({ error: 'User Already Checked In' });
+          }
+        }else {
+            attendanceRecord = await userAttendanceSchema.findOneAndUpdate({
+              _id: new mongoose.Types.ObjectId(record._id)
+            }, {
+              timeOutImg: imgPath,
+              timeOut: datetime
+            },
+            {new :true}
+          )
         }
       }else{
-        let attendancRecord : UserAttendance | null = null;
-        if(loginType == LoginType.TIME_IN){
-          attendancRecord = await userAttendanceSchema.create({
-            img: imgPath,
-            type: loginType,
+        if(loginType == 'TIME_IN'){
+          attendanceRecord = await userAttendanceSchema.create({
+            timeInImg: imgPath,
+            loginType: loginType,
             user: {
-              id: id
+              _id:  new mongoose.Types.ObjectId(id)
             },
             timeIn: datetime
           })
-        }else{
-          attendancRecord = await userAttendanceSchema.create({
-            img: imgPath,
-            type: loginType,
+        }else if(loginType == 'TIME_OUT'){
+          attendanceRecord = await userAttendanceSchema.create({
+            timeOutImg: imgPath,
+            loginType: loginType,
             user: {
-              id: id
+              _id:  new mongoose.Types.ObjectId(id)
             },
-            date: datetime,
             timeOut: datetime
           })
         }
-        res.status(200).send({attendancRecord})
       }
+     
 
   } catch (error: any) {
       console.log(error.message)
@@ -126,8 +136,7 @@ export const attendanceLogin = async (req: any, res: any) => {
 
 export const getAttendanceLogin = async (req: any, res: any) => {
   try {
-      const { datetime } = req.body;
-
+      const { datetime } = req.query;
       const now = new Date(datetime);
       const startOfToday = new Date(now.setHours(0, 0, 0, 0));
       const endOfToday = new Date(now.setHours(23, 59, 59, 999));
@@ -136,9 +145,11 @@ export const getAttendanceLogin = async (req: any, res: any) => {
         date: {
           $gte: startOfToday,
           $lte: endOfToday,
-        }
-      })
-      return res.status(200).send({attendanceRecords})
+        },
+        
+      }).populate('user')
+      .sort({_id: 1})
+      return res.status(200).send({data: attendanceRecords})
 
   } catch (error: any) {
       console.log(error.message)

@@ -9,18 +9,8 @@ export interface IUser {
     },
     contact: String,
     course: String,
-    role: RoleType,
+    role: String ,
     password: String | undefined,
-}
-
-export enum RoleType {
-    ADMIN,
-    USER,
-}
-
-export enum LoginType {
-    TIME_IN,
-    TIME_OUT
 }
 
 export interface Iimg {
@@ -34,26 +24,12 @@ export interface Iimg {
 }
 
 export interface UserAttendance {
+    loginType: string
     _id: string | undefined,
     user: IUser,
-    // attendance: AttendanceSetting,
-    type: LoginType,
-    img: Iimg,
+    timeInImg: Iimg,
+    timeOutImg: Iimg,
     date: Date
     timeIn: Date,
-    timeOut: Date
+    timeOut: Date,
 }
-
-// export interface AttendanceSetting {
-//     _id: string | undefined,
-//     status: boolean,
-//     timeIn: {
-//         start: Date,
-//         end: Date
-//     },
-//     timeOut: {
-//         start: Date,
-//         end: Date
-//     }
-// }
-
