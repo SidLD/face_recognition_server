@@ -161,3 +161,30 @@ export const getAttendanceLogin = async (req: any, res: any) => {
       res.status(400).send({message:"Invalid Data or Email Already Taken"})
   }
 }
+
+export const getUserAttendance = async (req: any, res: any) => {
+  try {
+      const {user, datetime} = req.query;
+
+      let condition:any = {
+        _id: new mongoose.Types.ObjectId(user),
+      }
+
+      if(datetime){
+        const now = new Date(datetime);
+        const startOfToday = new Date(now.setHours(0, 0, 0, 0));
+        const endOfToday = new Date(now.setHours(23, 59, 59, 999));
+        condition.date = {
+          $gte: startOfToday,
+          $lte: endOfToday,
+        }
+      }
+
+      const attendances = await userAttendanceSchema.find(condition).sort({createdAt: -1}).populate('user')
+      res.status(200).send(JSON.stringify(attendances))
+  } catch (error: any) {
+      console.log(error.message)
+      res.status(400).send({message:"Invalid Data or Email Already Taken"})
+  }
+}
+

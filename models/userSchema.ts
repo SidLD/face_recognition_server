@@ -1,6 +1,7 @@
 import mongoose, { Schema, model } from "mongoose";
 import { Iimg, IUser } from "../util/interface";
 
+// Profile Schema
 const profileSchema = new Schema<Iimg>(
   {
     user: {
@@ -31,23 +32,36 @@ const userSchema = new Schema<IUser>(
     username: {
       firstName: { type: String, required: true },
       lastName: { type: String, required: true },
-      middleName: String,  // Optional field
+      middleName: { type: String }, 
     },
     password: {
       type: String,
       required: false, 
     },
-    contact: { type: String, required: true },
-    course: { type: String, required: true },
+    contact: {
+      type: String,
+      required: true,
+    },
+    course: {
+      type: String,
+      required: true,
+    },
     role: {
+      type: String, 
       enum: Object.values(RoleType),
       required: true,
+      default: RoleType.USER
     },
     status: {
+      type: String, 
       enum: Object.values(StatusType),
       required: true,
+      default: StatusType.PENDING
     },
-    profile: { type: profileSchema, required: true },
+    profile: {
+      type: profileSchema,
+      required: true,
+    },
   },
   {
     timestamps: true,
