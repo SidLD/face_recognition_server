@@ -11,6 +11,12 @@ export interface IUser {
     course: String,
     role: String ,
     password: String | undefined,
+    status: StatusType
+}
+
+export enum StatusType {
+    PENDING,
+    APPROVED
 }
 
 export interface Iimg {

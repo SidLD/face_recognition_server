@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import userSchema from "../models/userSchema";
-import { IUser, UserAttendance } from "../util/interface";
+import { IUser, StatusType, UserAttendance } from "../util/interface";
 import bcrypt from 'bcrypt'
 import userAttendanceSchema from "../models/userAttendanceSchema";
 
@@ -35,7 +35,8 @@ export const register = async (req: any, res: any) => {
         password: hashedPassword,
         profile: {
           base64: profile
-        }
+        },
+        status: StatusType.PENDING
       })
       res.status(200).send({newUser})
 
@@ -63,6 +64,10 @@ export const attendanceLogin = async (req: any, res: any) => {
       const user: IUser | null = await userSchema.findOne({_id: new mongoose.Types.ObjectId(id)})
       if(!user){
         return res.status(400).json({ error: 'User Does Not Exist' });
+      }
+
+      if(user.status == StatusType.PENDING){
+        return res.status(400).json({ error: 'User is still Pending' });
       }
       
       const now = new Date();
