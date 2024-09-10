@@ -24,7 +24,8 @@ enum RoleType {
 
 enum StatusType {
   PENDING = 'PENDING',
-  APPROVED = 'APPROVED'
+  APPROVED = 'APPROVED',
+  DECLINED = 'DECLINED'
 }
 
 const userSchema = new Schema<IUser>(

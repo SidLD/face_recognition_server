@@ -16,7 +16,8 @@ export interface IUser {
 
 export enum StatusType {
     PENDING = 'PENDING',
-    APPROVED = 'APPROVED'
+    APPROVED = 'APPROVED',
+    DECLINED = 'DECLINED'
 }
 
 export interface Iimg {

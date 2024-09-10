@@ -188,3 +188,21 @@ export const getUserAttendance = async (req: any, res: any) => {
   }
 }
 
+export const approveUser = async (req: any, res: any) => {
+  try {
+      const {user, status} = req.body;
+
+     if(user && status){
+      const data = userSchema.updateOne({ _id: new mongoose.Types.ObjectId(user)}, {
+        status: status.toUpperCase()
+      })
+      res.status(200).send(JSON.stringify(data))
+     }else{
+      res.status(400).send({message:"User and Status are Required"})
+     }
+  } catch (error: any) {
+      console.log(error.message)
+      res.status(400).send({message:"Invalid Data"})
+  }
+}
+
