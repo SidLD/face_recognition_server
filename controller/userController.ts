@@ -179,7 +179,7 @@ export const getUserAttendance = async (req: any, res: any) => {
           $lte: endOfToday,
         }
       }
-
+      console.log(condition)
       const attendances = await userAttendanceSchema.find(condition).sort({createdAt: -1}).populate('user')
       res.status(200).send(JSON.stringify(attendances))
   } catch (error: any) {
