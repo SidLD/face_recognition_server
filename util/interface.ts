@@ -10,6 +10,7 @@ export interface IUser {
     contact: String,
     course: String,
     role: String ,
+    schoolId: String ,
     password: String | undefined,
     status: StatusType
 }

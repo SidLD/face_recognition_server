@@ -61,10 +61,10 @@ export const login = async (req: any, res: any) => {
 export const approveUser = async (req: any, res: any) => {
     try {
         // Extract the user ID from request parameters
-        const { userId } = req.body;
+        const { userId, status } = req.body;
 
         // Validate that the user ID is provided
-        if (!userId || !userId) {
+        if (!userId || !status) {
             return res.status(400).json({ error: 'Invalid user ID' });
         }
 
@@ -74,7 +74,7 @@ export const approveUser = async (req: any, res: any) => {
         // Find the user by ID and update their status to APPROVED
         const updatedUser = await userSchema.findByIdAndUpdate(
             {_id: new mongoose.Types.ObjectId(userId)},
-            { status: 'APPROVED' },
+            { status: status },
             { new: true } // Return the updated document
         );
 
@@ -84,7 +84,7 @@ export const approveUser = async (req: any, res: any) => {
 
         // Send response with updated user details
         res.status(200).json({
-            message: 'User approved successfully',
+            message: 'User Updated successfully',
             user: updatedUser
         });
 

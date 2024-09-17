@@ -32,6 +32,7 @@ export const register = async (req: any, res: any) => {
         contact: params.contact,
         course: params.course,
         role: params.role,
+        schoolId: params.schoolId,
         password: hashedPassword,
         profile: {
           base64: profile
@@ -55,6 +56,21 @@ export const getUsers = async (req: any, res: any) => {
         console.log(error.message)
         res.status(400).send({message:"Invalid Data or Email Already Taken"})
     }
+}
+
+export const getAdminUsers = async (req: any, res: any) => {
+  try {
+      const users = await userSchema.find({
+        role: {
+          $ne: 'ADMIN'
+        }
+      }).select('-password -profile');
+      res.status(200).send(JSON.stringify(users))
+
+  } catch (error: any) {
+      console.log(error.message)
+      res.status(400).send({message:"Invalid Data or Email Already Taken"})
+  }
 }
 
 export const attendanceLogin = async (req: any, res: any) => {
@@ -180,6 +196,37 @@ export const getUserAttendance = async (req: any, res: any) => {
         }
       }
       console.log(condition)
+      const attendances = await userAttendanceSchema.find(condition).sort({createdAt: -1}).populate('user')
+      res.status(200).send(JSON.stringify(attendances))
+  } catch (error: any) {
+      console.log(error.message)
+      res.status(400).send({message:"Invalid Data or Email Already Taken"})
+  }
+}
+
+export const getUsersWithAttendance = async (req: any, res: any) => {
+  try {
+      const {datetime} = req.query;
+
+      let condition:any = {}
+
+      if(datetime){
+        const now = new Date(datetime);
+        const startOfToday = new Date(now.setHours(0, 0, 0, 0));
+        const endOfToday = new Date(now.setHours(23, 59, 59, 999));
+        condition.date = {
+          $gte: startOfToday,
+          $lte: endOfToday,
+        }
+      }else{
+        const now = new Date();
+        const startOfToday = new Date(now.setHours(0, 0, 0, 0));
+        const endOfToday = new Date(now.setHours(23, 59, 59, 999));
+        condition.date = {
+          $gte: startOfToday,
+          $lte: endOfToday,
+        }
+      }
       const attendances = await userAttendanceSchema.find(condition).sort({createdAt: -1}).populate('user')
       res.status(200).send(JSON.stringify(attendances))
   } catch (error: any) {
