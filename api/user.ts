@@ -17,8 +17,8 @@ userAPI.get('/user/status', approveUser);
 //Admin
 userAPI.post('/admin/login', login);
 userAPI.put('/admin/user/status',verifyToken, AdminApprove);
-userAPI.get('/admin/user/attendance', verifyToken, getUserAttendance);
-userAPI.get('/admin/users/attendances', verifyToken, getUsersWithAttendance);
+userAPI.get('/admin/user/attendance', getUserAttendance);
+userAPI.get('/admin/users/attendances', getUsersWithAttendance);
 userAPI.get('/admin/users', verifyToken, getAdminUsers);
 
 export default userAPI

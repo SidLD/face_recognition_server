@@ -148,6 +148,7 @@ export const attendanceLogin = async (req: any, res: any) => {
         }
       }
      
+      return res.status(200).json({message: "Success" });
 
   } catch (error: any) {
       console.log(error.message)
