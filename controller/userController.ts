@@ -254,3 +254,20 @@ export const approveUser = async (req: any, res: any) => {
   }
 }
 
+export const deleteUser = async (req: any, res: any) => {
+  try {
+      const {userId} = req.body;
+
+     if(userId){
+      const data = userSchema.deleteOne({ _id: new mongoose.Types.ObjectId(userId)})
+      res.status(200).send(JSON.stringify(data))
+     }else{
+      res.status(400).send({message:"User Id is Required"})
+     }
+  } catch (error: any) {
+      console.log(error.message)
+      res.status(400).send({message:"Invalid Data"})
+  }
+}
+
+
