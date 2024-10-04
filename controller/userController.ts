@@ -163,19 +163,47 @@ export const getAttendanceLogin = async (req: any, res: any) => {
       const startOfToday = new Date(now.setHours(0, 0, 0, 0));
       const endOfToday = new Date(now.setHours(23, 59, 59, 999));
 
-      const attendanceRecords: UserAttendance[] = await userAttendanceSchema.find({
-        date: {
-          $gte: startOfToday,
-          $lte: endOfToday,
+      const attendanceRecords = await userAttendanceSchema.aggregate([
+        {
+          $match: {
+            date: {
+              $gte: startOfToday,
+              $lte: endOfToday,
+            },
+          },
         },
-        
-      }).populate('user')
-      .sort({_id: 1})
+        {
+          $lookup: {
+            from: 'users', // Ensure this is the correct collection name
+            localField: 'user',
+            foreignField: '_id',
+            as: 'user',
+          },
+        },
+        {
+          $unwind: '$user',
+        },
+        {
+          $match: {
+            'user.role': { $ne: 'ADMIN' },
+          },
+        },
+        {
+          $project: {
+            'user.password': 0,
+            'user.profile': 0,
+          },
+        },
+        {
+          $sort: { _id: 1 },
+        },
+      ]);
+  
       return res.status(200).send({data: attendanceRecords})
 
   } catch (error: any) {
       console.log(error.message)
-      res.status(400).send({message:"Invalid Data or Email Already Taken"})
+      res.status(400).send({message:"Invalid Data"})
   }
 }
 
@@ -228,7 +256,10 @@ export const getUsersWithAttendance = async (req: any, res: any) => {
           $lte: endOfToday,
         }
       }
-      const attendances = await userAttendanceSchema.find(condition).sort({createdAt: -1}).populate('user')
+      const attendances = await userAttendanceSchema.find({
+        ...condition,
+        'user.role': { $ne: 'ADMIN' } 
+      }).sort({createdAt: -1}).populate('user').select('-password -profile')
       res.status(200).send(JSON.stringify(attendances))
   } catch (error: any) {
       console.log(error.message)
@@ -241,7 +272,7 @@ export const approveUser = async (req: any, res: any) => {
       const {user, status} = req.body;
 
      if(user && status){
-      const data = userSchema.updateOne({ _id: new mongoose.Types.ObjectId(user)}, {
+      const data = await userSchema.updateOne({ _id: new mongoose.Types.ObjectId(user)}, {
         status: status.toUpperCase()
       })
       res.status(200).send(JSON.stringify(data))
@@ -257,12 +288,11 @@ export const approveUser = async (req: any, res: any) => {
 export const deleteUser = async (req: any, res: any) => {
   try {
       const {userId} = req.body;
-
      if(userId){
-      const data = userSchema.deleteOne({ _id: new mongoose.Types.ObjectId(userId)})
-      res.status(200).send(JSON.stringify(data))
+      const data = await userSchema.findByIdAndDelete(userId)
+      return res.status(200).send(data)
      }else{
-      res.status(400).send({message:"User Id is Required"})
+      return res.status(400).send({message:"User Id is Required"})
      }
   } catch (error: any) {
       console.log(error.message)
