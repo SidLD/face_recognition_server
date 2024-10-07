@@ -301,3 +301,42 @@ export const deleteUser = async (req: any, res: any) => {
 }
 
 
+export const getUsersAttendanceReport = async (req: any, res: any) => {
+  try {
+      const {startDate, endDate} = req.query;
+
+      let condition:any = {}
+
+      if(startDate){
+        const now = new Date(startDate);
+        const startOfToday = new Date(now.setHours(0, 0, 0, 0));
+        condition.date = {
+          $gte: startOfToday,
+        }
+      }
+
+      if(endDate){
+        const now = new Date(endDate);
+        const endOfToday = new Date(now.setHours(23, 59, 59, 999));
+        condition.date = {
+          $lte: endOfToday,
+        }
+      }
+
+      const attendances = await userAttendanceSchema.find({
+        ...condition,
+        'user.role': { $ne: 'ADMIN' },
+      })
+      .sort({ createdAt: -1 })
+      .populate({
+        path: 'user',
+        select: '-password -profile', // Exclude sensitive fields
+      });
+      res.status(200).send(JSON.stringify(attendances))
+  } catch (error: any) {
+      console.log(error.message)
+      res.status(400).send({message:"Invalid Data or Email Already Taken"})
+  }
+}
+
+
