@@ -14,9 +14,12 @@ export const register = async (req: any, res: any) => {
           return res.status(400).json({ error: 'First name, and last name are required' });
         }
       
-        const user:{
-          email: string
-        } | null = await userSchema.findOne({email: params.contact, contact: params.contact})
+        const user:IUser | null = await userSchema.findOne({
+          $or: [
+            { contact: params.contact },
+            { schoolId: params.schoolId }
+          ]
+        })
 
       if(user){
         return res.status(400).json({ error: 'User Already Exist' });
