@@ -25,6 +25,7 @@ const userAttendance = new Schema<UserAttendance>(
   {
     timestamps: true,
   }
+  
 );
 
 export default model<UserAttendance>("UserAttendance", userAttendance);
