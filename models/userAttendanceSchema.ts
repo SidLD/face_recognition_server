@@ -8,6 +8,11 @@ const userAttendance = new Schema<UserAttendance>(
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
     },
+    company: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Company",
+      required: true, 
+    },
     timeInImg: String,
     timeOutImg: String,
     date: {

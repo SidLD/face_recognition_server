@@ -67,6 +67,14 @@ const userSchema = new Schema<IUser>(
       type: profileSchema,
       required: true,
     },
+    companyId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Company",
+    },
+    isCompanyApprove: {
+      type: Boolean,
+      default: false
+    }
   },
   {
     timestamps: true,

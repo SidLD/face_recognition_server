@@ -1,6 +1,6 @@
 
 export interface IUser {
-    _id: String | undefined,
+    _id: String,
     profile: Iimg,
     username:{
         firstName: String,
@@ -12,7 +12,21 @@ export interface IUser {
     role: String ,
     schoolId: String ,
     password: String | undefined,
-    status: StatusType
+    status: StatusType,
+    companyId: String,
+    isCompanyApprove: Boolean,
+}
+
+export interface ICompany {
+    save(): unknown
+    _id: String | undefined,
+    name: String,
+    address: String,
+    contactNumber: String,
+    email: String,
+    createdAt: Date,
+    updatedAt: Date,
+    employees: IUser[]
 }
 
 export enum StatusType {
@@ -40,4 +54,5 @@ export interface UserAttendance {
     date: Date
     timeIn: Date,
     timeOut: Date,
+    company: ICompany
 }

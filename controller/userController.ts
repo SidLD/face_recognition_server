@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
 import userSchema from "../models/userSchema";
-import { IUser, StatusType, UserAttendance } from "../util/interface";
+import { ICompany, IUser, StatusType, UserAttendance } from "../util/interface";
 import bcrypt from 'bcrypt'
 import userAttendanceSchema from "../models/userAttendanceSchema";
-
+import CompanyModel from "../models/companySchema"; // Import the Company model
 
 export const register = async (req: any, res: any) => {
     try {
@@ -78,15 +78,28 @@ export const getAdminUsers = async (req: any, res: any) => {
 
 export const attendanceLogin = async (req: any, res: any) => {
   try {
-      const { id, imgPath, loginType, datetime } = req.body;
+      const { id, imgPath, loginType, datetime , companyId} = req.body;
     
       const user: IUser | null = await userSchema.findOne({_id: new mongoose.Types.ObjectId(id)})
+      const companyData: ICompany | null = await CompanyModel.findById(companyId)
+
       if(!user){
         return res.status(400).json({ error: 'User Does Not Exist' });
       }
 
+      if(!companyData){
+        return res.status(400).json({ error: 'Company Does not Exist' });
+      }
+
       if(user.status == StatusType.PENDING){
         return res.status(400).json({ error: 'User is still Pending' });
+      }
+
+      const isAlreadyEmployee = companyData.employees.some(
+        (empId) => empId.toString() === user._id.toString()
+      );
+      if (!isAlreadyEmployee || !(user.companyId && user.isCompanyApprove)) {
+        return res.status(400).json({ error: "The user is either not part of this company or has not been approved." });
       }
       
       const now = new Date();
@@ -95,8 +108,9 @@ export const attendanceLogin = async (req: any, res: any) => {
 
       const record: UserAttendance | null = await userAttendanceSchema.findOne({
         user: {
-          _id:  new mongoose.Types.ObjectId(id)
+          _id:  new mongoose.Types.ObjectId(id),
         },
+        company: companyData,
         date: {
           $gte: startOfToday,
           $lte: endOfToday,
@@ -137,6 +151,7 @@ export const attendanceLogin = async (req: any, res: any) => {
             user: {
               _id:  new mongoose.Types.ObjectId(id)
             },
+            company: new mongoose.Types.ObjectId(companyId), 
             timeIn: datetime
           })
         }else if(loginType == 'TIME_OUT'){
@@ -146,6 +161,7 @@ export const attendanceLogin = async (req: any, res: any) => {
             user: {
               _id:  new mongoose.Types.ObjectId(id)
             },
+            company: new mongoose.Types.ObjectId(companyId),
             timeOut: datetime
           })
         }
@@ -177,7 +193,7 @@ export const getAttendanceLogin = async (req: any, res: any) => {
         },
         {
           $lookup: {
-            from: 'users', // Ensure this is the correct collection name
+            from: 'users', 
             localField: 'user',
             foreignField: '_id',
             as: 'user',
@@ -227,8 +243,7 @@ export const getUserAttendance = async (req: any, res: any) => {
           $lte: endOfToday,
         }
       }
-      console.log(condition)
-      const attendances = await userAttendanceSchema.find(condition).sort({createdAt: -1}).populate('user')
+      const attendances = await userAttendanceSchema.find(condition).sort({createdAt: -1}).populate('user').populate('company')
       res.status(200).send(JSON.stringify(attendances))
   } catch (error: any) {
       console.log(error.message)
@@ -262,7 +277,7 @@ export const getUsersWithAttendance = async (req: any, res: any) => {
       const attendances = await userAttendanceSchema.find({
         ...condition,
         'user.role': { $ne: 'ADMIN' } 
-      }).sort({createdAt: -1}).populate('user').select('-password -profile')
+      }).sort({createdAt: -1}).populate('user').select('-password -profile').populate('company')
       res.status(200).send(JSON.stringify(attendances))
   } catch (error: any) {
       console.log(error.message)
@@ -334,7 +349,8 @@ export const getUsersAttendanceReport = async (req: any, res: any) => {
       .populate({
         path: 'user',
         select: '-password -profile', // Exclude sensitive fields
-      });
+      })
+      .populate('company');
       res.status(200).send(JSON.stringify(attendances))
   } catch (error: any) {
       console.log(error.message)

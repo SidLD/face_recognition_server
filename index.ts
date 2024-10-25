@@ -3,6 +3,7 @@ import bodyParser from 'body-parser';
 import userAPI from './api/user';
 import cors from 'cors'
 import mongoose from 'mongoose';
+import companyAPI from './api/company';
 const app = express();
 const port = process.env.PORT || 8888;
 
@@ -13,7 +14,7 @@ const corsOptions = {
 }
 app.use(cors(corsOptions));
 app.use(userAPI)
-
+app.use(companyAPI)
 //Database
 try {
     mongoose.set("strictQuery", false);
