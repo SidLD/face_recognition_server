@@ -5,8 +5,9 @@ import { applyToCompany, approveCompanyApplication, createCompany, updateCompany
 dotenv.config()
 const companyAPI = express()
 
-companyAPI.post('/admin/company',verifyToken, createCompany);
-companyAPI.put('/admin/company',verifyToken, updateCompany);
+companyAPI.get('/companies/:id', updateCompany);
+companyAPI.post('/admin/companies',verifyToken, createCompany);
+companyAPI.put('/admin/companies/:id',verifyToken, updateCompany);
 
 companyAPI.post('/user/apply-company',verifyToken, applyToCompany);
 companyAPI.post('/user/approve-company',verifyToken, approveCompanyApplication);
