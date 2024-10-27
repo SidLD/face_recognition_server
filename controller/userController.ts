@@ -78,17 +78,17 @@ export const getAdminUsers = async (req: any, res: any) => {
 
 export const attendanceLogin = async (req: any, res: any) => {
   try {
-      const { id, imgPath, loginType, datetime , companyId} = req.body;
+      const { id, imgPath, loginType, datetime } = req.body;
     
       const user: IUser | null = await userSchema.findOne({_id: new mongoose.Types.ObjectId(id)})
-      const companyData: ICompany | null = await CompanyModel.findById(companyId)
+      const companyData: ICompany | null = await CompanyModel.findById(user?.companyId)
 
       if(!user){
         return res.status(400).json({ error: 'User Does Not Exist' });
       }
 
       if(!companyData){
-        return res.status(400).json({ error: 'Company Does not Exist' });
+        return res.status(400).json({ error: "User need to have a registered and approved company." });
       }
 
       if(user.status == StatusType.PENDING){
@@ -151,7 +151,7 @@ export const attendanceLogin = async (req: any, res: any) => {
             user: {
               _id:  new mongoose.Types.ObjectId(id)
             },
-            company: new mongoose.Types.ObjectId(companyId), 
+            company: new mongoose.Types.ObjectId(user.companyId as string), 
             timeIn: datetime
           })
         }else if(loginType == 'TIME_OUT'){
@@ -161,7 +161,7 @@ export const attendanceLogin = async (req: any, res: any) => {
             user: {
               _id:  new mongoose.Types.ObjectId(id)
             },
-            company: new mongoose.Types.ObjectId(companyId),
+            company: new mongoose.Types.ObjectId(user.companyId as string),
             timeOut: datetime
           })
         }

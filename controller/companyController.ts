@@ -163,3 +163,40 @@ export const updateCompany = async (req: any, res: any) => {
       res.status(400).json({ message: "Failed to update company" });
     }
 };
+
+export const getCompany = async (req: any, res: any) => {
+  try {
+    const { id } = req.params;
+    let condition:any = {}
+    if(id){
+      condition._id = id
+    }
+    const companies:any = await CompanyModel.findById(condition).populate('employees');
+    if (companies.length == 0) {
+      return res.status(404).json({ error: "Company not found" });
+    }
+    res.status(200).json(companies);
+  } catch (error: any) {
+    console.log(error.message);
+    res.status(400).json({ message: "Failed to retrieve company" });
+  }
+};
+
+export const searchCompanies = async (req: any, res: any) => {
+  try {
+    const { search } = req.query;
+    const companies = await CompanyModel.find({
+      $or: [
+        { name: { $regex: search, $options: 'i' } },
+        { address: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+        { contactNumber: { $regex: search, $options: 'i' } },
+      ],
+    });
+
+    res.status(200).json({ companies });
+  } catch (error: any) {
+    console.log(error.message);
+    res.status(400).json({ message: "Failed to search companies" });
+  }
+};

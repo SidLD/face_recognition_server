@@ -9,4 +9,6 @@ attachmentAPI.put('/attachments/:id',    verifyToken , updateAttachment);
 attachmentAPI.delete('/attachments/:id', verifyToken , deleteAttachment);
 attachmentAPI.get('/attachments/:id',    verifyToken , getAttachments);
 
+attachmentAPI.get('/attachments' , getAttachments);
+
 export default attachmentAPI;

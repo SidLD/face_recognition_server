@@ -38,6 +38,19 @@ export const getAttachments = async (req: Request, res: Response) => {
   }
 };
 
+
+export const searchAttachments = async (req: Request, res: Response) => {
+  try {
+    const { filename } = req.query;
+    let attachments: IAttachment[] = [];
+    attachments = await Attachment.find({ filename: { $regex: filename, $options: 'i' } });
+    res.status(200).json(attachments);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch attachments' });
+  }
+};
+
 export const updateAttachment = async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
