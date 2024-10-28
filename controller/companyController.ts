@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { IUser, ICompany,  } from "../util/interface";
 import UserModel from "../models/userSchema"; 
 import CompanyModel from "../models/companySchema"; 
+import { createNotification } from "./notificationController";
 
 export const createCompany = async (req: any, res: any) => {
   try {
@@ -118,6 +119,12 @@ export const approveCompanyApplication = async (req: any, res: any) => {
             await CompanyModel.updateOne(
                 { _id: company._id }, { employees}
             )
+            await createNotification({
+              userid: user._id,
+              companyid: company._id as string,
+              title: "Application Decline",
+              description: `Your Application to Company ${company.name} has been declined!`,
+            });
             return res.status(200).json({ message: "Application to company has been deleted" });
         }else{
             await UserModel.updateOne({
@@ -125,6 +132,12 @@ export const approveCompanyApplication = async (req: any, res: any) => {
             }, {
                 isCompanyApprove: status,
             })
+            await createNotification({
+              userid: user._id,
+              companyid: company._id as string,
+              title: "Application Approve",
+              description: `Your Application to Company ${company.name} has been approved!`,
+            });
             return res.status(200).json({ message: "Application to company has been approve" });
         }
     } catch (error: any) {

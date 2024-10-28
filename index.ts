@@ -5,6 +5,7 @@ import cors from 'cors'
 import mongoose from 'mongoose';
 import companyAPI from './api/company';
 import attachmentAPI from './api/attachment';
+import notificationAPI from './api/notification';
 const app = express();
 const port = process.env.PORT || 8888;
 
@@ -17,6 +18,7 @@ app.use(cors(corsOptions));
 app.use(userAPI)
 app.use(companyAPI)
 app.use(attachmentAPI)
+app.use(notificationAPI)
 //Database
 try {
     mongoose.set("strictQuery", false);
