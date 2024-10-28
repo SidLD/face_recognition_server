@@ -13,6 +13,7 @@ export interface IUser {
     schoolId: String ,
     password: String | undefined,
     status: StatusType,
+    applicationAttempt: Number,
     companyId: String,
     isCompanyApprove: Boolean,
 }

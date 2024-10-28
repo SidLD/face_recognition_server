@@ -67,6 +67,10 @@ const userSchema = new Schema<IUser>(
       type: profileSchema,
       required: true,
     },
+    applicationAttempt: {
+      type: Number,
+      default: 0
+    },
     companyId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Company",

@@ -9,7 +9,7 @@ import {
 dotenv.config();
 const notificationAPI = express();
 
-notificationAPI.get('/notifications', verifyToken, getAllNotifications);
-notificationAPI.put('/notifications/:id/read', verifyToken, markAsRead);
+notificationAPI.get('/notifications', getAllNotifications);
+notificationAPI.put('/notifications/:id/read', markAsRead);
 
 export default notificationAPI;

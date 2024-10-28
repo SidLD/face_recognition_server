@@ -45,6 +45,10 @@ export const applyToCompany = async (req: any, res: any) => {
       return res.status(404).json({ error: "User or Company not found" });
     }
 
+    if(Number(user.applicationAttempt) >= 3){
+      return res.status(404).json({ error: "No more attemp left for application" });
+    }
+
     if(user.companyId && user.isCompanyApprove){
         return res.status(400).json({ error: "User is already an employee of a company" });
     }
@@ -62,9 +66,10 @@ export const applyToCompany = async (req: any, res: any) => {
                 _id: user._id,
             }, {
                 isCompanyApprove: false,
-                companyId: company._id
+                companyId: company._id,
+                applicationAttempt: Number(user.applicationAttempt) + 1
             })
-        
+
             await CompanyModel.updateOne(
                 { _id: company._id }, { employees }
             )
@@ -74,7 +79,7 @@ export const applyToCompany = async (req: any, res: any) => {
     }
 
   } catch (error: any) {
-    console.log(error.message);
+    console.log(error);
     res.status(400).json({ message: "Failed to apply to company" });
   }
 };
