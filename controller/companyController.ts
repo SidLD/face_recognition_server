@@ -153,17 +153,17 @@ export const approveCompanyApplication = async (req: any, res: any) => {
 
 export const updateCompany = async (req: any, res: any) => {
     try {
-      const { companyId, name, address, contactNumber, email } = req.body;
-  
+      const { name, address, contactNumber, email } = req.body;
+      const {id} = req.params;
       if (req.user.role !== "ADMIN") {
         return res.status(403).json({ error: "Access Denied" });
       }
   
-      if (!companyId) {
+      if (!id) {
         return res.status(400).json({ error: "Company ID is required" });
       }
   
-      const company = await CompanyModel.findById(companyId);
+      const company = await CompanyModel.findById(id);
       if (!company) {
         return res.status(404).json({ error: "Company not found" });
       }
@@ -186,10 +186,13 @@ export const getCompany = async (req: any, res: any) => {
   try {
     const { id } = req.params;
     let condition:any = {}
-    if(id){
+    if(id != 'all'){
       condition._id = id
     }
-    const companies:any = await CompanyModel.findById(condition).populate('employees');
+    const companies:any = await CompanyModel.find(condition).populate({
+      path: 'employees',
+      select: 'username',
+    });
     if (companies.length == 0) {
       return res.status(404).json({ error: "Company not found" });
     }
@@ -216,5 +219,19 @@ export const searchCompanies = async (req: any, res: any) => {
   } catch (error: any) {
     console.log(error.message);
     res.status(400).json({ message: "Failed to search companies" });
+  }
+};
+
+export const getPendingApplication = async (req: any, res: any) => {
+  try {
+    const pendingApplications = await UserModel.find({
+      companyId: { $ne: null }, 
+      isCompanyApprove: false, 
+      role: {$ne: 'ADMIN'}
+    }).populate('companyId', 'name _id');
+    res.status(200).json(pendingApplications);
+  } catch (error: any) {
+    console.log(error.message);
+    res.status(400).json({ message: "Failed to retrieve company" });
   }
 };
