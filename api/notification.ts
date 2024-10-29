@@ -1,6 +1,5 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import { verifyToken } from '../util/verify';
 import { 
   getAllNotifications, 
   markAsRead 
@@ -9,7 +8,7 @@ import {
 dotenv.config();
 const notificationAPI = express();
 
-notificationAPI.get('/notifications', getAllNotifications);
+notificationAPI.get('/notifications/:userId', getAllNotifications);
 notificationAPI.put('/notifications/:id/read', markAsRead);
 
 export default notificationAPI;

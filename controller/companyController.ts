@@ -4,6 +4,7 @@ import { IUser, ICompany,  } from "../util/interface";
 import UserModel from "../models/userSchema"; 
 import CompanyModel from "../models/companySchema"; 
 import { createNotification } from "./notificationController";
+import userAttendanceSchema from "../models/userAttendanceSchema";
 
 export const createCompany = async (req: any, res: any) => {
   try {
@@ -235,3 +236,38 @@ export const getPendingApplication = async (req: any, res: any) => {
     res.status(400).json({ message: "Failed to retrieve company" });
   }
 };
+
+export const getCompanyAttendance = async (req: any, res: any) => {
+  try {
+    const { datetime } = req.query;
+    const { id } = req.params; 
+    console.log(datetime, id);
+
+    let condition: any = {
+      company: new mongoose.Types.ObjectId(id), 
+    };
+
+    if (datetime) {
+      const now = new Date(datetime);
+      const startOfToday = new Date(now.setHours(0, 0, 0, 0));
+      const endOfToday = new Date(now.setHours(23, 59, 59, 999));
+      condition.date = {
+        $gte: startOfToday,
+        $lte: endOfToday,
+      };
+    }
+
+    const attendances = await userAttendanceSchema.find(condition)
+      .sort({ createdAt: -1 })
+      .populate({
+        path: 'user',
+        select: 'username course'
+      })
+      .populate('company'); 
+
+    res.status(200).send(JSON.stringify(attendances));
+  } catch (error: any) {
+    console.log(error.message);
+    res.status(400).send({ message: "Invalid Data or Email Already Taken" });
+  }
+}

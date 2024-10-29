@@ -1,7 +1,7 @@
 import express from 'express'
 import dotenv from 'dotenv'
 import { verifyToken } from '../util/verify';
-import { applyToCompany, approveCompanyApplication, createCompany, getCompany, getPendingApplication, searchCompanies, updateCompany } from '../controller/companyController';
+import { applyToCompany, approveCompanyApplication, createCompany, getCompany, getCompanyAttendance, getPendingApplication, searchCompanies, updateCompany } from '../controller/companyController';
 dotenv.config()
 const companyAPI = express()
 
@@ -13,5 +13,6 @@ companyAPI.post('/admin/approve-company',verifyToken, approveCompanyApplication)
 
 companyAPI.post('/user/apply-company', applyToCompany);
 companyAPI.get('/admin/companies/pending-aplication',verifyToken, getPendingApplication)
+companyAPI.get('/admin/companies/:id/attendance',verifyToken, getCompanyAttendance)
 
 export default companyAPI

@@ -21,12 +21,10 @@ interface CreateNotificationParams {
 
   export const getAllNotifications = async (req: Request, res: Response) => {
     try {
-      const { userid, companyid } = req.query;
-      const filter: any = {};
-      if (userid) filter.userid = userid;
-      if (companyid) filter.companyid = companyid;
-  
-      const notifications = await Notification.find(filter).sort({ createdAt: -1 });
+      const { userId } = req.params;
+      const notifications = await Notification.find({
+        userid: userId
+      }).sort({ createdAt: -1 });
       return res.status(200).json(notifications);
     } catch (error) {
       return res.status(500).json({ message: "Error retrieving notifications", error });
