@@ -79,27 +79,27 @@ export const getAdminUsers = async (req: any, res: any) => {
 export const attendanceLogin = async (req: any, res: any) => {
   try {
       const { id, imgPath, loginType, datetime } = req.body;
-    
-      const user: IUser | null = await userSchema.findOne({_id: new mongoose.Types.ObjectId(id)})
-      const companyData: ICompany | null = await CompanyModel.findById(user?.companyId)
+  
+      const user: IUser | null = await userSchema.findOne({ _id: new mongoose.Types.ObjectId(id) });
+      const companyData: ICompany | null = await CompanyModel.findById(user?.companyId);
 
-      if(!user){
-        return res.status(400).json({ error: 'User Does Not Exist' });
+      if (!user) {
+          return res.status(400).json({ error: 'User Does Not Exist' });
       }
 
-      if(!companyData){
-        return res.status(400).json({ error: "User need to have a registered and approved company." });
+      if (!companyData) {
+          return res.status(400).json({ error: "User needs to have a registered and approved company." });
       }
 
-      if(user.status == StatusType.PENDING){
-        return res.status(400).json({ error: 'User is still Pending' });
+      if (user.status === StatusType.PENDING) {
+          return res.status(400).json({ error: 'User is still Pending' });
       }
 
       const isAlreadyEmployee = companyData.employees.some(
-        (empId) => empId.toString() === user._id.toString()
+          (empId) => empId.toString() === user._id.toString()
       );
       if (!isAlreadyEmployee || !(user.companyId && user.isCompanyApprove)) {
-        return res.status(400).json({ error: "The user is either not part of this company or has not been approved." });
+          return res.status(400).json({ error: "The user is either not part of this company or has not been approved." });
       }
       
       const now = new Date();
@@ -107,73 +107,111 @@ export const attendanceLogin = async (req: any, res: any) => {
       const endOfToday = new Date(now.setHours(23, 59, 59, 999));
 
       const record: UserAttendance | null = await userAttendanceSchema.findOne({
-        user: {
-          _id:  new mongoose.Types.ObjectId(id),
-        },
-        company: companyData,
-        date: {
-          $gte: startOfToday,
-          $lte: endOfToday,
-        }
-      })
+          user: { _id: new mongoose.Types.ObjectId(id) },
+          company: companyData,
+          date: { $gte: startOfToday, $lte: endOfToday },
+      });
 
-      let attendanceRecord : UserAttendance | null = null;
+      let attendanceRecord: UserAttendance | null = null;
 
-      if(record){
-        if(loginType == 'TIME_IN' ){
-          if(!record.timeIn){
-            attendanceRecord = await userAttendanceSchema.findOneAndUpdate({
-              _id: new mongoose.Types.ObjectId(record._id)
-            }, {
-              timeInImg: imgPath,
-              timeIn: datetime
-            },
-            {new :true}
-            )
-          }else{
-            return res.status(400).json({ error: 'User Already Checked In' });
+      if (record) {
+          if (loginType === 'TIME_IN_AM') {
+              if (!record.timeInAM) {
+                  attendanceRecord = await userAttendanceSchema.findOneAndUpdate(
+                      { _id: new mongoose.Types.ObjectId(record._id) },
+                      {
+                          timeInImgAM: imgPath,
+                          timeInAM: datetime,
+                      },
+                      { new: true }
+                  );
+              } else {
+                  return res.status(400).json({ error: 'User Already Checked In for AM' });
+              }
+          } else if (loginType === 'TIME_IN_PM') {
+              if (!record.timeInPM) {
+                  attendanceRecord = await userAttendanceSchema.findOneAndUpdate(
+                      { _id: new mongoose.Types.ObjectId(record._id) },
+                      {
+                          timeInImgPM: imgPath,
+                          timeInPM: datetime,
+                      },
+                      { new: true }
+                  );
+              } else {
+                  return res.status(400).json({ error: 'User Already Checked In for PM' });
+              }
+          } else if (loginType === 'TIME_OUT_AM') {
+              if (!record.timeOutAM) {
+                  attendanceRecord = await userAttendanceSchema.findOneAndUpdate(
+                      { _id: new mongoose.Types.ObjectId(record._id) },
+                      {
+                          timeOutImgAM: imgPath,
+                          timeOutAM: datetime,
+                      },
+                      { new: true }
+                  );
+              } else {
+                  return res.status(400).json({ error: 'User Already Checked Out for AM' });
+              }
+          } else if (loginType === 'TIME_OUT_PM') {
+              if (!record.timeOutPM) {
+                  attendanceRecord = await userAttendanceSchema.findOneAndUpdate(
+                      { _id: new mongoose.Types.ObjectId(record._id) },
+                      {
+                          timeOutImgPM: imgPath,
+                          timeOutPM: datetime,
+                      },
+                      { new: true }
+                  );
+              } else {
+                  return res.status(400).json({ error: 'User Already Checked Out for PM' });
+              }
           }
-        }else {
-            attendanceRecord = await userAttendanceSchema.findOneAndUpdate({
-              _id: new mongoose.Types.ObjectId(record._id)
-            }, {
-              timeOutImg: imgPath,
-              timeOut: datetime
-            },
-            {new :true}
-          )
-        }
-      }else{
-        if(loginType == 'TIME_IN'){
-          attendanceRecord = await userAttendanceSchema.create({
-            timeInImg: imgPath,
-            loginType: loginType,
-            user: {
-              _id:  new mongoose.Types.ObjectId(id)
-            },
-            company: new mongoose.Types.ObjectId(user.companyId as string), 
-            timeIn: datetime
-          })
-        }else if(loginType == 'TIME_OUT'){
-          attendanceRecord = await userAttendanceSchema.create({
-            timeOutImg: imgPath,
-            loginType: loginType,
-            user: {
-              _id:  new mongoose.Types.ObjectId(id)
-            },
-            company: new mongoose.Types.ObjectId(user.companyId as string),
-            timeOut: datetime
-          })
-        }
+      } else {
+          const attendanceData = {
+              user: { _id: new mongoose.Types.ObjectId(id) },
+              company: new mongoose.Types.ObjectId(user.companyId as string),
+          };
+
+          if (loginType === 'TIME_IN_AM') {
+              attendanceRecord = await userAttendanceSchema.create({
+                  ...attendanceData,
+                  timeInImgAM: imgPath,
+                  timeInAM: datetime,
+                  loginType,
+              });
+          } else if (loginType === 'TIME_IN_PM') {
+              attendanceRecord = await userAttendanceSchema.create({
+                  ...attendanceData,
+                  timeInImgPM: imgPath,
+                  timeInPM: datetime,
+                  loginType,
+              });
+          } else if (loginType === 'TIME_OUT_AM') {
+              attendanceRecord = await userAttendanceSchema.create({
+                  ...attendanceData,
+                  timeOutImgAM: imgPath,
+                  timeOutAM: datetime,
+                  loginType,
+              });
+          } else if (loginType === 'TIME_OUT_PM') {
+              attendanceRecord = await userAttendanceSchema.create({
+                  ...attendanceData,
+                  timeOutImgPM: imgPath,
+                  timeOutPM: datetime,
+                  loginType,
+              });
+          }
       }
-     
-      return res.status(200).json({message: "Success" });
+   
+      return res.status(200).json({ message: "Success" });
 
   } catch (error: any) {
-      console.log(error.message)
-      res.status(400).send({message:"Invalid Data or Email Already Taken"})
+      console.log(error.message);
+      res.status(400).send({ message: "Invalid Data or Email Already Taken" });
   }
-}
+};
 
 export const getAttendanceLogin = async (req: any, res: any) => {
   try {

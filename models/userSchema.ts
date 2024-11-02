@@ -78,7 +78,13 @@ const userSchema = new Schema<IUser>(
     isCompanyApprove: {
       type: Boolean,
       default: false
-    }
+    },
+    attachments: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "UserAttachment",
+      },
+    ],
   },
   {
     timestamps: true,

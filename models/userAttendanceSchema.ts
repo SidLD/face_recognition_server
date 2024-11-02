@@ -13,14 +13,18 @@ const userAttendance = new Schema<UserAttendance>(
       ref: "Company",
       required: true, 
     },
-    timeInImg: String,
-    timeOutImg: String,
+    timeInImgAM: String,
+    timeOutImgAM: String,
+    timeInImgPM: String,
+    timeOutImgPM: String,
     date: {
         type: Date,
         default: new Date()
     },
-    timeIn: Date,
-    timeOut: Date
+    timeInAM: Date,
+    timeOutAM: Date,
+    timeInPM: Date,
+    timeOutPM: Date
   },
   {
     timestamps: true,

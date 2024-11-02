@@ -1,3 +1,4 @@
+import { IUserAttachment } from "../models/userAttachmentSchema"
 
 export interface IUser {
     _id: String,
@@ -16,6 +17,9 @@ export interface IUser {
     applicationAttempt: Number,
     companyId: String,
     isCompanyApprove: Boolean,
+    attachments: [
+        IUserAttachment
+    ]
 }
 
 export interface ICompany {
@@ -50,10 +54,14 @@ export interface UserAttendance {
     loginType: string
     _id: string | undefined,
     user: IUser,
-    timeInImg: Iimg,
-    timeOutImg: Iimg,
+    timeInImgAM: Iimg,
+    timeOutImgAM: Iimg,
+    timeInImgPM: Iimg,
+    timeOutImgPM: Iimg,
     date: Date
-    timeIn: Date,
-    timeOut: Date,
+    timeInAM: Date,
+    timeOutAM: Date,
+    timeInPM: Date,
+    timeOutPM: Date,
     company: ICompany
 }
