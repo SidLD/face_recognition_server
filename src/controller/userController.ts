@@ -299,10 +299,12 @@ export const getUserAttendance = async (req: any, res: any) => {
 
 export const getUsersWithAttendance = async (req: any, res: any) => {
   try {
-      const {datetime} = req.query;
+      const {datetime, user} = req.query;
 
       let condition:any = {}
-
+      if(user){
+        condition.user = new mongoose.Types.ObjectId(user)
+      }
       if(datetime){
         const now = new Date(datetime);
         const startOfToday = new Date(now.setHours(0, 0, 0, 0));
