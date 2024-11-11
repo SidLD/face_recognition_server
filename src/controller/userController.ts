@@ -142,6 +142,9 @@ export const attendanceLogin = async (req: any, res: any) => {
                   return res.status(400).json({ error: 'User Already Checked In for PM' });
               }
           } else if (loginType === 'TIME_OUT_AM') {
+              if(!record.timeInAM){
+                return res.status(400).json({ error: 'User need to Time In First' });
+              }
               if (!record.timeOutAM) {
                   attendanceRecord = await userAttendanceSchema.findOneAndUpdate(
                       { _id: new mongoose.Types.ObjectId(record._id) },
@@ -155,6 +158,9 @@ export const attendanceLogin = async (req: any, res: any) => {
                   return res.status(400).json({ error: 'User Already Checked Out for AM' });
               }
           } else if (loginType === 'TIME_OUT_PM') {
+            if(!record.timeInPM){
+              return res.status(400).json({ error: 'User need to Time In First' });
+            }
               if (!record.timeOutPM) {
                   attendanceRecord = await userAttendanceSchema.findOneAndUpdate(
                       { _id: new mongoose.Types.ObjectId(record._id) },
@@ -188,20 +194,8 @@ export const attendanceLogin = async (req: any, res: any) => {
                   timeInPM: datetime,
                   loginType,
               });
-          } else if (loginType === 'TIME_OUT_AM') {
-              attendanceRecord = await userAttendanceSchema.create({
-                  ...attendanceData,
-                  timeOutImgAM: imgPath,
-                  timeOutAM: datetime,
-                  loginType,
-              });
-          } else if (loginType === 'TIME_OUT_PM') {
-              attendanceRecord = await userAttendanceSchema.create({
-                  ...attendanceData,
-                  timeOutImgPM: imgPath,
-                  timeOutPM: datetime,
-                  loginType,
-              });
+          } else {
+            return res.status(400).json({ error: 'User need to Time In First' });
           }
       }
    
