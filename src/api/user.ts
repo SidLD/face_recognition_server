@@ -1,7 +1,7 @@
 import express from 'express'
 import dotenv from 'dotenv'
 import { verifyToken } from '../util/verify';
-import { attendanceLogin, getAttendanceLogin, getUsers, register, getUserAttendance, approveUser, getUsersWithAttendance, getAdminUsers, deleteUser, getUsersAttendanceReport } from '../controller/userController';
+import { attendanceLogin, getAttendanceLogin, getUsers, register, getUserAttendance, approveUser, getUsersWithAttendance, getAdminUsers, deleteUser, getUsersAttendanceReport, getUsersAttendance } from '../controller/userController';
 import { login, loginAdmin, approveUser as AdminApprove } from '../controller/adminController';
 dotenv.config()
 const userAPI = express()
@@ -11,6 +11,7 @@ userAPI.get('/users', getUsers);
 userAPI.post('/attendance', attendanceLogin);
 userAPI.get('/attendance', getAttendanceLogin);
 userAPI.get('/attendance/user', getUserAttendance);
+userAPI.get('/users-attendance', getUsersAttendance);
 userAPI.get('/user/status', approveUser);
 userAPI.post('/login', login);
 

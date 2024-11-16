@@ -4,7 +4,7 @@ import UserAttachment from '../models/userAttachmentSchema';
 
 export const createAttachment = async (req: Request, res: Response) => {
   try {
-    const { fileUrl, fileName, fileType } = req.body;
+    const { fileUrl, fileName, fileType, description } = req.body;
 
     if (!fileUrl || !fileName || !fileType ) {
       return res.status(400).json({ error: 'Missing required fields' });
@@ -13,7 +13,8 @@ export const createAttachment = async (req: Request, res: Response) => {
     const newAttachment = await Attachment.create({
       filename: fileName,
       fileUrl,
-      fileType
+      fileType,
+      description
     });
 
     return res.status(201).json({ message: 'Attachment saved successfully', attachment: newAttachment });
@@ -54,11 +55,11 @@ export const searchAttachments = async (req: Request, res: Response) => {
 export const updateAttachment = async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
-      const { filename, fileUrl, fileType } = req.body;
+      const { filename, fileUrl, fileType, description } = req.body;
   
       const updatedAttachment = await Attachment.findByIdAndUpdate(
         id,
-        { filename, fileUrl, fileType },
+        { filename, fileUrl, fileType, description },
         { new: true } 
       );
   
@@ -93,9 +94,9 @@ export const deleteAttachment = async (req: Request, res: Response) => {
 
 export const createUserAttachment = async (req: Request, res: Response) => {
   try {
-    const { fileUrl, fileName, fileType } = req.body;
+    const { fileUrl, fileName, fileType, description } = req.body;
     const { userId } = req.params;
-    if (!fileUrl || !fileName || !fileType ) {
+    if (!fileUrl || !fileName || !fileType || !description ) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
@@ -103,6 +104,7 @@ export const createUserAttachment = async (req: Request, res: Response) => {
       filename: fileName,
       fileUrl,
       fileType,
+      description,
       user: userId
     });
 
@@ -130,6 +132,16 @@ export const getUserAttachments = async (req: Request, res: Response) => {
   }
 };
 
+export const getUsersAttachments = async (req: Request, res: Response) => {
+  try {
+    const attachments = await UserAttachment.find({}).populate('user', 'username contact');
+    res.status(200).json(attachments);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch attachments' });
+  }
+};
+
 export const searchUserAttachments = async (req: Request, res: Response) => {
   try {
     const { filename } = req.query;
@@ -146,11 +158,11 @@ export const searchUserAttachments = async (req: Request, res: Response) => {
 export const updateUserAttachment = async (req: Request, res: Response) => {
     try {
       const { userId, attachmentId } = req.params;
-      const { filename, fileUrl, fileType } = req.body;
+      const { filename, fileUrl, fileType, description } = req.body;
   
       const updatedAttachment = await UserAttachment.findOneAndUpdate(
         { _id: attachmentId, user: userId},
-        { filename, fileUrl, fileType },
+        { filename, fileUrl, fileType, description },
         { new: true } 
       );
   

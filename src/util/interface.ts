@@ -17,6 +17,11 @@ export interface IUser {
     applicationAttempt: Number,
     companyId: String,
     isCompanyApprove: Boolean,
+    requiredHours:number,
+    service_time: {
+        hour: number,
+        minute: number
+    },
     attachments: [
         IUserAttachment
     ]

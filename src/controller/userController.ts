@@ -291,6 +291,39 @@ export const getUserAttendance = async (req: any, res: any) => {
   }
 }
 
+export const getUsersAttendance = async (req: any, res: any) => {
+  try {
+      const {startDate,  endDate, companyId} = req.query;
+      let condition:any = {
+        company: new mongoose.Types.ObjectId(companyId),
+      }
+      if(startDate && endDate){
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        const startOfToday = new Date(start.setHours(0, 0, 0, 0));
+        const endOfToday = new Date(end.setHours(23, 59, 59, 999));
+        condition.date = {
+          $gte: startOfToday,
+          $lte: endOfToday,
+        }
+      }else{
+        const now = new Date();
+        const startOfToday = new Date(now.setHours(0, 0, 0, 0));
+        const endOfToday = new Date(now.setHours(23, 59, 59, 999));
+        condition.date = {
+          $gte: startOfToday,
+          $lte: endOfToday,
+        }
+      }
+      console.log("tes", condition)
+      const attendances = await userAttendanceSchema.find(condition).sort({createdAt: -1}).populate('user', 'username').populate('company')
+      res.status(200).send(JSON.stringify(attendances))
+  } catch (error: any) {
+      console.log(error.message)
+      res.status(400).send({message:"Invalid Data or Email Already Taken"})
+  }
+}
+
 export const getUsersWithAttendance = async (req: any, res: any) => {
   try {
       const {datetime, user} = req.query;

@@ -1,5 +1,5 @@
 import express from 'express';
-import { createAttachment, createUserAttachment, deleteAttachment, deleteUserAttachment, getAttachments, getUserAttachments, updateAttachment, updateUserAttachment } from '../controller/attachmentController';
+import { createAttachment, createUserAttachment, deleteAttachment, deleteUserAttachment, getAttachments, getUserAttachments, getUsersAttachments, updateAttachment, updateUserAttachment } from '../controller/attachmentController';
 import { verifyToken } from '../util/verify';
 
 const attachmentAPI = express.Router();
@@ -13,6 +13,7 @@ attachmentAPI.post('/user/:userId/attachment' , createUserAttachment);
 attachmentAPI.put('/user/:userId/attachments/:attachmentId' , updateUserAttachment);
 attachmentAPI.delete('/user/:userId/attachments/:attachmentId' , deleteUserAttachment);
 attachmentAPI.get('/user/:userId/attachments/:attachmentId' , getUserAttachments);
+attachmentAPI.get('/users/attachments/', verifyToken, getUsersAttachments);
 
 attachmentAPI.get('/attachments' , getAttachments);
 

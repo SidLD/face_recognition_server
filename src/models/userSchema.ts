@@ -79,6 +79,20 @@ const userSchema = new Schema<IUser>(
       type: Boolean,
       default: false
     },
+    requiredHours: {
+      type: Number,
+      default: 300
+    },
+    service_time: {
+      hour: {
+        type: Number,
+        default: 0
+      },
+      minute: {
+        type: Number,
+        default: 0
+      }
+    },
     attachments: [
       {
         type: mongoose.Schema.Types.ObjectId,

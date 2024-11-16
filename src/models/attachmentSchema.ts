@@ -4,6 +4,7 @@ interface IAttachment extends Document {
   filename: string;
   fileUrl: string;
   fileType: string;
+  description: string;
   uploadedAt: Date;
 }
 
@@ -12,6 +13,7 @@ const AttachmentSchema: Schema = new Schema<IAttachment>({
   fileUrl: { type: String, required: true },
   fileType: { type: String, required: true },
   uploadedAt: { type: Date, default: Date.now },
+  description: {type: String}
 });
 
 const Attachment = mongoose.model<IAttachment>('Attachment', AttachmentSchema);
