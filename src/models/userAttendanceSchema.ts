@@ -1,5 +1,6 @@
 import mongoose, { Schema, model } from "mongoose";
 import {  UserAttendance } from "../util/interface";
+import { type } from "os";
 
 
 const userAttendance = new Schema<UserAttendance>(
@@ -24,7 +25,17 @@ const userAttendance = new Schema<UserAttendance>(
     timeInAM: Date,
     timeOutAM: Date,
     timeInPM: Date,
-    timeOutPM: Date
+    timeOutPM: Date,
+    service_time: {
+      hour: {
+        type: Number,
+        default: 0
+      },
+      minute: {
+        type: Number,
+        default: 0
+      }
+   }
   },
   {
     timestamps: true,

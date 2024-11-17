@@ -63,6 +63,9 @@ const userSchema = new Schema<IUser>(
       required: true,
       default: StatusType.PENDING
     },
+    activeStatus: {
+      type: Boolean, 
+    },
     profile: {
       type: profileSchema,
       required: true,

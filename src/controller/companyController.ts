@@ -51,7 +51,7 @@ export const applyToCompany = async (req: any, res: any) => {
     }
 
     if(user.companyId && user.isCompanyApprove){
-        return res.status(400).json({ error: "User is already an employee of a company" });
+        return res.status(400).json({ error: "User is already an intern of a company" });
     }
 
     let employees = company.employees;

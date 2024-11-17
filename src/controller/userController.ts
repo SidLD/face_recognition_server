@@ -4,6 +4,7 @@ import { ICompany, IUser, StatusType, UserAttendance } from "../util/interface";
 import bcrypt from 'bcrypt'
 import userAttendanceSchema from "../models/userAttendanceSchema";
 import CompanyModel from "../models/companySchema"; // Import the Company model
+import { emitNotification } from "../util/socket";
 
 export const register = async (req: any, res: any) => {
     try {
@@ -174,6 +175,49 @@ export const attendanceLogin = async (req: any, res: any) => {
                   return res.status(400).json({ error: 'User Already Checked Out for PM' });
               }
           }
+
+          let hours = 0;
+          let min = 0;
+          if (attendanceRecord?.timeInAM && attendanceRecord?.timeOutAM) {
+            // Assuming timeInAM and timeOutAM are Date objects
+            const startAM = new Date(attendanceRecord.timeInAM);
+            const endAM = new Date(attendanceRecord.timeOutAM);
+          
+            // Calculate the time difference for the AM shift
+            const { diffHours: hoursAM, diffMinutes: minutesAM } = calculateTimeDifference(startAM, endAM);
+          
+            hours += hoursAM;
+            min += minutesAM;
+          }
+          
+          if (attendanceRecord?.timeInPM && attendanceRecord?.timeOutPM) {
+            // Assuming timeInPM and timeOutPM are Date objects
+            const startPM = new Date(attendanceRecord.timeInPM);
+            const endPM = new Date(attendanceRecord.timeOutPM);
+          
+            // Calculate the time difference for the PM shift
+            const { diffHours: hoursPM, diffMinutes: minutesPM } = calculateTimeDifference(startPM, endPM);
+          
+            hours += hoursPM;
+            min += minutesPM;
+          }
+          
+          // Handle minutes overflow (e.g., 65 minutes should be 1 hour and 5 minutes)
+          if (min >= 60) {
+            hours += Math.floor(min / 60);
+            min = min % 60;
+          }
+          
+          attendanceRecord = await userAttendanceSchema.findOneAndUpdate(
+            { _id: new mongoose.Types.ObjectId(record._id) },
+            {
+              service_time: {
+                hour: hours,
+                minute: min
+              }    
+            }
+          );
+
       } else {
           const attendanceData = {
               user: { _id: new mongoose.Types.ObjectId(id) },
@@ -198,6 +242,7 @@ export const attendanceLogin = async (req: any, res: any) => {
             return res.status(400).json({ error: 'User need to Time In First' });
           }
       }
+
    
       return res.status(200).json({ message: "Success" });
 
@@ -378,6 +423,30 @@ export const approveUser = async (req: any, res: any) => {
   }
 }
 
+export const triggerStatus = async (req: any, res: any) => {
+  try {
+      const {userId, status} = req.params;
+      const data = await userSchema.findOneAndUpdate({_id: new mongoose.Types.ObjectId(userId)}, {
+        activeStatus: status
+      }).select('_id username')
+      await emitNotification({userId, status, username: data?.username})
+      res.status(200).send();
+  } catch (error: any) {
+      console.log(error.message)
+      res.status(400).send({message:"Invalid Data"})
+  }
+}
+
+export const getActiveStudents = async (req: any, res: any) => {
+  try {
+      const users = await userSchema.find({activeStatus: true}).select('username _id')
+      res.status(200).send(JSON.stringify((users)));
+  } catch (error: any) {
+      console.log(error.message)
+      res.status(400).send({message:"Invalid Data"})
+  }
+}
+
 export const deleteUser = async (req: any, res: any) => {
   try {
       const {userId} = req.body;
@@ -433,4 +502,63 @@ export const getUsersAttendanceReport = async (req: any, res: any) => {
   }
 }
 
+function calculateTimeDifference(startDate: any, endDate: any) {
+  // Get the time difference in milliseconds
+  const diffInMs = endDate - startDate;
+  // Convert milliseconds to minutes
+  const diffInMinutes = diffInMs / 60000;
+  
+  // Calculate hours and minutes from the total minutes
+  const diffHours = Math.floor(diffInMinutes / 60);
+  const diffMinutes = Math.round(diffInMinutes % 60);
 
+  return { diffHours, diffMinutes };
+}
+
+export const getServiceTime = async (req: any, res: any) => {
+  try {
+    // Assume we get the userId from the request (you can adjust this as needed)
+    const {userId} = req.params;
+    // Query the database to get the attendance records for the user
+    const userAttendances = await userAttendanceSchema.find({ user: userId });
+
+    let totalHours = 0;
+    let totalMinutes = 0;
+
+    // Process each attendance record and sum up the hours and minutes
+    for (const record of userAttendances) {
+      // Add the worked hours and minutes for each record
+      if (record.service_time.hour) {
+        totalHours += record.service_time.hour;
+      }
+      if (record.service_time.minute) {
+        totalMinutes += record.service_time.minute;
+      }
+    }
+
+    // Handle overflow of minutes (more than 60 minutes should be added to hours)
+    if (totalMinutes >= 60) {
+      totalHours += Math.floor(totalMinutes / 60);
+      totalMinutes = totalMinutes % 60;
+    }
+
+    // Convert total time worked to total hours (decimal format)
+    const totalWorkedHours = totalHours + (totalMinutes / 60);
+
+    // Define the target service time (600 hours)
+    const targetServiceTime = 600;
+
+    // Calculate the percentage of service time
+    const servicePercentage = (totalWorkedHours / targetServiceTime) * 100;
+
+    // Send the response with the calculated data
+    res.status(200).send({
+      totalWorkedHours : totalWorkedHours.toFixed(2),
+      totalWorkedHoursFormatted: `${totalHours} hours and ${totalMinutes} minutes`,
+      servicePercentage: servicePercentage.toFixed(3),
+    });
+  } catch (error: any) {
+    console.log(error.message);
+    res.status(400).send({ message: "Error processing attendance data" });
+  }
+};

@@ -8,6 +8,7 @@ export interface IUser {
         middleName?: String,
         lastName: String,
     },
+    activeStatus: boolean,
     contact: String,
     course: String,
     role: String ,
@@ -68,5 +69,9 @@ export interface UserAttendance {
     timeOutAM: Date,
     timeInPM: Date,
     timeOutPM: Date,
-    company: ICompany
+    company: ICompany,
+    service_time: {
+        hour: number,
+        minute: number
+    }
 }

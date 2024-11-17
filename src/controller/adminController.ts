@@ -9,30 +9,29 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 export const loginAdmin = async (req: any, res: any) => {
     try {
         const { contact, password } = req.body;
-
+        
         if (!contact || !password) {
             return res.status(400).json({ error: 'Contact and password are required' });
         }
-
+        
         // Find the user by contact
         const user = await userSchema.findOne({ contact , role: 'ADMIN'}).exec();
-
+        
         if (!user) {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
-
         // Check if the password is correct
         const isMatch = await bcrypt.compare(password, user.password as string);
-
+        
         if (!isMatch) {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
-
+        
         // Check for admin role
         if (user.role !== 'ADMIN') {
             return res.status(403).json({ error: 'Access denied' });
         }
-
+        
         // Generate a JWT token
         const token = jwt.sign(
             { userId: user._id, role: user.role },
