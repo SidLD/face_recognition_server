@@ -13,6 +13,10 @@ const companySchema = new Schema<ICompany>(
         ref: "User",
       },
     ],
+    internCount: {
+      type: Number,
+      default: 0
+    }
   },
   {
     timestamps: true, 

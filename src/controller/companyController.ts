@@ -8,7 +8,7 @@ import userAttendanceSchema from "../models/userAttendanceSchema";
 
 export const createCompany = async (req: any, res: any) => {
   try {
-    const { name, address, contactNumber, email } = req.body;
+    const { name, address, contactNumber, email, internCount } = req.body;
     if(req.user.role != 'ADMIN'){
         return res.status(404).json({ error: "Access Denied" });
     }
@@ -21,6 +21,7 @@ export const createCompany = async (req: any, res: any) => {
       address,
       contactNumber,
       email,
+      internCount,
       employees: [],
     });
 
@@ -48,6 +49,10 @@ export const applyToCompany = async (req: any, res: any) => {
 
     if(Number(user.applicationAttempt) >= 3){
       return res.status(404).json({ error: "No more attemp left for application" });
+    }
+
+    if(Number(company.employees) >  Number(company.internCount)){
+      return res.status(404).json({ error: "No more slot for applcication" });
     }
 
     if(user.companyId && user.isCompanyApprove){
@@ -154,7 +159,7 @@ export const approveCompanyApplication = async (req: any, res: any) => {
 
 export const updateCompany = async (req: any, res: any) => {
     try {
-      const { name, address, contactNumber, email } = req.body;
+      const { name, address, contactNumber, email, internCount } = req.body;
       const {id} = req.params;
       if (req.user.role !== "ADMIN") {
         return res.status(403).json({ error: "Access Denied" });
@@ -173,6 +178,7 @@ export const updateCompany = async (req: any, res: any) => {
       company.address = address ?? company.address;
       company.contactNumber = contactNumber ?? company.contactNumber;
       company.email = email ?? company.email;
+      company.internCount = internCount ?? company.internCount;
   
       await company.save();
   

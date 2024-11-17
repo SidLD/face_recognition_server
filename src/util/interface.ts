@@ -29,7 +29,6 @@ export interface IUser {
 }
 
 export interface ICompany {
-    save(): unknown
     _id: String | undefined,
     name: String,
     address: String,
@@ -38,6 +37,7 @@ export interface ICompany {
     createdAt: Date,
     updatedAt: Date,
     employees: IUser[]
+    internCount: number
 }
 
 export enum StatusType {
