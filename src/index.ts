@@ -8,6 +8,7 @@ import attachmentAPI from './api/attachment';
 import notificationAPI from './api/notification';
 import { emitNotification, initializeSocket } from './util/socket';
 import http, { createServer } from 'http'; 
+import { run } from './util/dataGenerator';
 
 const app = express();
 const server = createServer(app);
@@ -38,6 +39,13 @@ try {
 setTimeout(() => {
   emitNotification({})
 }, 5000)
+
+
+//Dummy
+
+// run();
+
+
 // Start the server
 server.listen(port, () => {
   console.log(`> Ready on http://localhost:${port}`);

@@ -514,25 +514,39 @@ function calculateTimeDifference(startDate: any, endDate: any) {
 
   return { diffHours, diffMinutes };
 }
-
 export const getServiceTime = async (req: any, res: any) => {
   try {
     // Assume we get the userId from the request (you can adjust this as needed)
-    const {userId} = req.params;
+    const { userId } = req.params;
+
     // Query the database to get the attendance records for the user
-    const userAttendances = await userAttendanceSchema.find({ user: userId });
+    const userAttendances: UserAttendance[] = await userAttendanceSchema.find({ user: userId });
 
     let totalHours = 0;
     let totalMinutes = 0;
 
-    // Process each attendance record and sum up the hours and minutes
+    // Helper function to calculate the difference in hours and minutes between two Date objects
+    const calculateTimeDifference = (timeIn: Date, timeOut: Date): { hours: number, minutes: number } => {
+      const diffMs = timeOut.getTime() - timeIn.getTime(); // Difference in milliseconds
+      const diffMinutes = diffMs / (1000 * 60); // Convert milliseconds to minutes
+
+      const hours = Math.floor(diffMinutes / 60);
+      const minutes = diffMinutes % 60;
+
+      return { hours, minutes };
+    };
+
+    // Process each attendance record and calculate the service time for each
     for (const record of userAttendances) {
-      // Add the worked hours and minutes for each record
-      if (record.service_time.hour) {
-        totalHours += record.service_time.hour;
-      }
-      if (record.service_time.minute) {
-        totalMinutes += record.service_time.minute;
+      // Check if all necessary times (AM and PM) are present
+      if (record.timeInAM && record.timeOutAM && record.timeInPM && record.timeOutPM) {
+        // Calculate worked time for AM and PM separately
+        const { hours: amHours, minutes: amMinutes } = calculateTimeDifference(record.timeInAM, record.timeOutAM);
+        const { hours: pmHours, minutes: pmMinutes } = calculateTimeDifference(record.timeInPM, record.timeOutPM);
+
+        // Add to total time
+        totalHours += amHours + pmHours;
+        totalMinutes += amMinutes + pmMinutes;
       }
     }
 
@@ -547,13 +561,13 @@ export const getServiceTime = async (req: any, res: any) => {
 
     // Define the target service time (600 hours)
     const targetServiceTime = 600;
-
+    console.log(totalWorkedHours)
     // Calculate the percentage of service time
     const servicePercentage = (totalWorkedHours / targetServiceTime) * 100;
 
     // Send the response with the calculated data
     res.status(200).send({
-      totalWorkedHours : totalWorkedHours.toFixed(2),
+      totalWorkedHours: totalWorkedHours.toFixed(2),
       totalWorkedHoursFormatted: `${totalHours} hours and ${totalMinutes} minutes`,
       servicePercentage: servicePercentage.toFixed(3),
     });
@@ -562,3 +576,5 @@ export const getServiceTime = async (req: any, res: any) => {
     res.status(400).send({ message: "Error processing attendance data" });
   }
 };
+
+
